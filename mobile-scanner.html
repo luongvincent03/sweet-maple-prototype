@@ -55,10 +55,11 @@
     font-weight: 600;
   }
   .app-header .brand {
-    font-family: 'Georgia', serif;
-    color: #c0392b;
-    font-size: 14px;
-    font-style: italic;
+    height: 20px;
+  }
+  .app-header .brand img {
+    height: 100%;
+    width: auto;
   }
   .back-btn {
     color: #4a9eff;
@@ -520,8 +521,8 @@
   <!-- ===== LAUNCH SCREEN ===== -->
   <div class="screen active" id="launch-screen" onclick="showScreen('login-screen')">
     <div class="launch-time" id="launch-clock">10:20</div>
-    <div class="launch-brand">Sweet Maple</div>
-    <div class="launch-sub">Candies Co. Ltd.</div>
+    <div class="launch-brand"><img src="logo.png" alt="Sweet Maple Candies" style="height:40px; width:auto;"></div>
+    <div class="launch-sub"></div>
     <div class="tap-hint">Tap to unlock</div>
   </div>
 
@@ -529,7 +530,7 @@
   <div class="screen" id="login-screen">
     <div class="login-form">
       <div class="brand-header">
-        <h1>Sweet Maple</h1>
+        <img src="logo.png" alt="Sweet Maple" style="height:30px; width:auto;">
       </div>
       <div class="form-group">
         <label>Username:</label>
@@ -547,7 +548,7 @@
   <div class="screen" id="home-screen">
     <div class="app-header">
       <span class="page-title">Home</span>
-      <span class="brand">Sweet Maple</span>
+      <span class="brand"><img src="logo.png" alt="Sweet Maple"></span>
     </div>
     <div class="home-content">
       <ul class="menu-list">
@@ -581,7 +582,7 @@
     <div class="app-header">
       <button class="back-btn" onclick="showScreen('home-screen')">&larr;</button>
       <span class="page-title">Batch Scanning</span>
-      <span class="brand">Sweet Maple</span>
+      <span class="brand"><img src="logo.png" alt="Sweet Maple"></span>
     </div>
     <div class="scanner-content">
       <p class="scan-instruction">Scan a barcode or enter Batch ID manually</p>
@@ -658,7 +659,7 @@
     <div class="app-header">
       <button class="back-btn" onclick="showScreen('home-screen')">&larr;</button>
       <span class="page-title">Inventory</span>
-      <span class="brand">Sweet Maple</span>
+      <span class="brand"><img src="logo.png" alt="Sweet Maple"></span>
     </div>
     <div class="scanner-content">
       <p class="scan-instruction">Scan a barcode to log an inventory transaction</p>
@@ -746,7 +747,7 @@
     <div class="app-header">
       <button class="back-btn" onclick="showScreen('home-screen')">&larr;</button>
       <span class="page-title">Lifecycle / FIFO</span>
-      <span class="brand">Sweet Maple</span>
+      <span class="brand"><img src="logo.png" alt="Sweet Maple"></span>
     </div>
     <div class="scanner-content">
       <p class="scan-instruction">Scan a barcode to check product lifecycle status</p>
