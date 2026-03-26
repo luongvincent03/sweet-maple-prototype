@@ -765,6 +765,180 @@
     white-space: nowrap;
     color: var(--text);
   }
+
+  /* ===== NEW ORDER MODAL ===== */
+  .new-order-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 500;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+  }
+  .new-order-overlay.open {
+    display: flex;
+  }
+  .new-order-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .new-order-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .new-order-modal-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .new-order-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .new-order-modal-close:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .new-order-modal-body {
+    padding: 24px;
+  }
+  .new-order-modal-body .form-group {
+    margin-bottom: 16px;
+  }
+  .new-order-modal-body .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .new-order-modal-body .form-group input,
+  .new-order-modal-body .form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .new-order-modal-body .form-group input:focus,
+  .new-order-modal-body .form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .line-item-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .line-item-row select {
+    flex: 2;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .line-item-row input[type="number"] {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .line-item-row select:focus,
+  .line-item-row input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .line-item-remove {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .line-item-remove:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .btn-add-product {
+    padding: 6px 14px;
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .btn-add-product:hover {
+    border-color: var(--accent);
+    background: rgba(74,158,255,0.05);
+  }
+  .new-order-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ===== TOAST NOTIFICATION ===== */
+  .toast-notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--green);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .toast-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
 </style>
 </head>
 <body>
@@ -1325,20 +1499,20 @@
   <!-- ===== ORDERS PAGE ===== -->
   <div class="page" id="page-orders">
     <div class="filter-bar">
-      <input type="text" placeholder="Search order or customer...">
-      <select>
+      <input type="text" id="order-search" placeholder="Search order or customer...">
+      <select id="order-status-filter">
         <option>All Status</option>
         <option>Pending</option>
         <option>In Progress</option>
         <option>Fulfilled</option>
-        <option>Shipped</option>
+        <option>Shipping</option>
       </select>
-      <button class="btn btn-primary">Search</button>
-      <button class="btn btn-outline" style="margin-left:auto;">+ New Order</button>
+      <button class="btn btn-primary" id="order-search-btn">Search</button>
+      <button class="btn btn-outline" id="new-order-btn" style="margin-left:auto;">+ New Order</button>
     </div>
-    <div class="panel-grid equal">
-      <div>
-        <div class="order-card">
+    <div class="panel-grid equal" id="order-grid">
+      <div id="order-col-left">
+        <div class="order-card" data-order-id="ORD-4425" data-customer="Metro Grocery Inc." data-status="In Progress">
           <div class="order-top">
             <span class="order-id">ORD-4425</span>
             <span class="status cooking">In Progress</span>
@@ -1350,7 +1524,7 @@
             <span>65% <div class="progress-bar"><div class="progress-fill" style="width:65%; background:var(--orange);"></div></div></span>
           </div>
         </div>
-        <div class="order-card">
+        <div class="order-card" data-order-id="ORD-4424" data-customer="CandyLand Distributors" data-status="Pending">
           <div class="order-top">
             <span class="order-id">ORD-4424</span>
             <span class="status mixing">Pending</span>
@@ -1362,7 +1536,7 @@
             <span>20% <div class="progress-bar"><div class="progress-fill" style="width:20%; background:var(--accent);"></div></div></span>
           </div>
         </div>
-        <div class="order-card">
+        <div class="order-card" data-order-id="ORD-4421" data-customer="QuickMart B2B" data-status="Fulfilled">
           <div class="order-top">
             <span class="order-id">ORD-4421</span>
             <span class="status complete">Fulfilled</span>
@@ -1375,8 +1549,8 @@
           </div>
         </div>
       </div>
-      <div>
-        <div class="order-card">
+      <div id="order-col-right">
+        <div class="order-card" data-order-id="ORD-4423" data-customer="Sweet Treats Wholesale" data-status="In Progress">
           <div class="order-top">
             <span class="order-id">ORD-4423</span>
             <span class="status cooking">In Progress</span>
@@ -1388,7 +1562,7 @@
             <span>40% <div class="progress-bar"><div class="progress-fill" style="width:40%; background:var(--orange);"></div></div></span>
           </div>
         </div>
-        <div class="order-card">
+        <div class="order-card" data-order-id="ORD-4422" data-customer="PartySupply Co." data-status="Shipping">
           <div class="order-top">
             <span class="order-id">ORD-4422</span>
             <span class="status packaging">Shipping</span>
@@ -1400,7 +1574,7 @@
             <span>90% <div class="progress-bar"><div class="progress-fill" style="width:90%; background:var(--green);"></div></div></span>
           </div>
         </div>
-        <div class="order-card">
+        <div class="order-card" data-order-id="ORD-4426" data-customer="Costco Wholesale" data-status="Pending">
           <div class="order-top">
             <span class="order-id">ORD-4426</span>
             <span class="status mixing">Pending</span>
@@ -1412,7 +1586,7 @@
             <span>10% <div class="progress-bar"><div class="progress-fill" style="width:10%; background:var(--accent);"></div></div></span>
           </div>
         </div>
-        <div class="order-card">
+        <div class="order-card" data-order-id="ORD-4427" data-customer="Dollar Tree Supply" data-status="In Progress">
           <div class="order-top">
             <span class="order-id">ORD-4427</span>
             <span class="status cooking">In Progress</span>
@@ -1424,7 +1598,7 @@
             <span>35% <div class="progress-bar"><div class="progress-fill" style="width:35%; background:var(--orange);"></div></div></span>
           </div>
         </div>
-        <div class="order-card">
+        <div class="order-card" data-order-id="ORD-4428" data-customer="GroceryMax Chain" data-status="Fulfilled">
           <div class="order-top">
             <span class="order-id">ORD-4428</span>
             <span class="status complete">Fulfilled</span>
@@ -1663,6 +1837,61 @@
   </div>
 
 </div>
+
+<!-- New Order Modal -->
+<div class="new-order-overlay" id="new-order-overlay">
+  <div class="new-order-modal">
+    <div class="new-order-modal-header">
+      <h2>Create New Order</h2>
+      <button class="new-order-modal-close" id="new-order-modal-close">&times;</button>
+    </div>
+    <div class="new-order-modal-body">
+      <div class="form-group">
+        <label>Customer Name</label>
+        <input type="text" id="new-order-customer" placeholder="Enter customer name...">
+      </div>
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" id="new-order-due">
+      </div>
+      <div class="form-group">
+        <label>Products</label>
+        <div id="new-order-line-items">
+          <div class="line-item-row">
+            <select>
+              <option value="">Select product...</option>
+              <option>Jawbreakers</option>
+              <option>Gummy Bears</option>
+              <option>Hard Candy Mix</option>
+              <option>Lollipops</option>
+              <option>Caramels</option>
+              <option>Toffee</option>
+              <option>Gummy Worms</option>
+              <option>Rock Candy</option>
+              <option>Sour Belts</option>
+              <option>Chocolate Truffles</option>
+              <option>Peppermint Sticks</option>
+              <option>Butterscotch Drops</option>
+              <option>Candy Corn</option>
+              <option>Taffy</option>
+              <option>Marshmallow Twists</option>
+            </select>
+            <input type="number" min="1" placeholder="Qty">
+            <button class="line-item-remove" onclick="removeLineItem(this)" title="Remove">&times;</button>
+          </div>
+        </div>
+        <button class="btn-add-product" id="add-product-btn">+ Add Product</button>
+      </div>
+    </div>
+    <div class="new-order-modal-footer">
+      <button class="btn btn-outline" id="new-order-cancel">Cancel</button>
+      <button class="btn btn-primary" id="new-order-create">Create Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-notification" id="toast-notification"></div>
 
 <!-- Report Modal -->
 <div class="report-modal-overlay" id="report-modal-overlay">
@@ -2130,6 +2359,151 @@
         reportOverlay.classList.add('open');
       }
     });
+  });
+
+  // ===== ORDER FILTERS =====
+  const orderSearch = document.getElementById('order-search');
+  const orderStatusFilter = document.getElementById('order-status-filter');
+  const orderSearchBtn = document.getElementById('order-search-btn');
+
+  function filterOrders() {
+    const q = orderSearch.value.trim().toLowerCase();
+    const status = orderStatusFilter.value;
+    const allCards = document.querySelectorAll('#page-orders .order-card');
+
+    allCards.forEach(card => {
+      const orderId = (card.dataset.orderId || '').toLowerCase();
+      const customer = (card.dataset.customer || '').toLowerCase();
+      const cardStatus = card.dataset.status || '';
+
+      let show = true;
+      if (q && !orderId.includes(q) && !customer.includes(q)) show = false;
+      if (status !== 'All Status' && cardStatus !== status) show = false;
+
+      card.style.display = show ? '' : 'none';
+    });
+  }
+
+  orderSearch.addEventListener('input', filterOrders);
+  orderStatusFilter.addEventListener('change', filterOrders);
+  orderSearchBtn.addEventListener('click', filterOrders);
+
+  // ===== NEW ORDER MODAL =====
+  const newOrderOverlay = document.getElementById('new-order-overlay');
+  const newOrderBtn = document.getElementById('new-order-btn');
+  const newOrderClose = document.getElementById('new-order-modal-close');
+  const newOrderCancel = document.getElementById('new-order-cancel');
+  const newOrderCreate = document.getElementById('new-order-create');
+  const addProductBtn = document.getElementById('add-product-btn');
+  const lineItemsContainer = document.getElementById('new-order-line-items');
+
+  const productOptions = [
+    'Jawbreakers', 'Gummy Bears', 'Hard Candy Mix', 'Lollipops', 'Caramels',
+    'Toffee', 'Gummy Worms', 'Rock Candy', 'Sour Belts', 'Chocolate Truffles',
+    'Peppermint Sticks', 'Butterscotch Drops', 'Candy Corn', 'Taffy', 'Marshmallow Twists'
+  ];
+
+  function openNewOrderModal() {
+    newOrderOverlay.classList.add('open');
+  }
+
+  function closeNewOrderModal() {
+    newOrderOverlay.classList.remove('open');
+    // Reset form
+    document.getElementById('new-order-customer').value = '';
+    document.getElementById('new-order-due').value = '';
+    lineItemsContainer.innerHTML = '';
+    addLineItemRow();
+  }
+
+  function addLineItemRow() {
+    const row = document.createElement('div');
+    row.className = 'line-item-row';
+    let optionsHtml = '<option value="">Select product...</option>';
+    productOptions.forEach(p => { optionsHtml += '<option>' + p + '</option>'; });
+    row.innerHTML = '<select>' + optionsHtml + '</select>'
+      + '<input type="number" min="1" placeholder="Qty">'
+      + '<button class="line-item-remove" onclick="removeLineItem(this)" title="Remove">&times;</button>';
+    lineItemsContainer.appendChild(row);
+  }
+
+  function removeLineItem(btn) {
+    const row = btn.closest('.line-item-row');
+    if (lineItemsContainer.querySelectorAll('.line-item-row').length > 1) {
+      row.remove();
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast-notification');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 3000);
+  }
+
+  // Track the next order number
+  let nextOrderNum = 4429;
+
+  newOrderBtn.addEventListener('click', openNewOrderModal);
+  newOrderClose.addEventListener('click', closeNewOrderModal);
+  newOrderCancel.addEventListener('click', closeNewOrderModal);
+  newOrderOverlay.addEventListener('click', function(e) {
+    if (e.target === newOrderOverlay) closeNewOrderModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && newOrderOverlay.classList.contains('open')) closeNewOrderModal();
+  });
+  addProductBtn.addEventListener('click', addLineItemRow);
+
+  newOrderCreate.addEventListener('click', function() {
+    const customer = document.getElementById('new-order-customer').value.trim();
+    const dueDate = document.getElementById('new-order-due').value;
+    const lineRows = lineItemsContainer.querySelectorAll('.line-item-row');
+
+    if (!customer) { alert('Please enter a customer name.'); return; }
+    if (!dueDate) { alert('Please select a due date.'); return; }
+
+    // Gather line items
+    const items = [];
+    lineRows.forEach(row => {
+      const product = row.querySelector('select').value;
+      const qty = row.querySelector('input[type="number"]').value;
+      if (product && qty && parseInt(qty) > 0) {
+        items.push(product + ' x' + parseInt(qty).toLocaleString());
+      }
+    });
+
+    if (items.length === 0) { alert('Please add at least one product with a quantity.'); return; }
+
+    // Format due date as MM/DD/YY
+    const d = new Date(dueDate + 'T00:00:00');
+    const dueFmt = String(d.getMonth() + 1).padStart(2, '0') + '/'
+      + String(d.getDate()).padStart(2, '0') + '/'
+      + String(d.getFullYear()).slice(-2);
+
+    const orderId = 'ORD-' + nextOrderNum;
+    nextOrderNum++;
+
+    // Build the new order card HTML
+    const cardHtml = '<div class="order-card" data-order-id="' + orderId + '" data-customer="' + customer.replace(/"/g, '&quot;') + '" data-status="Pending">'
+      + '<div class="order-top">'
+      + '<span class="order-id">' + orderId + '</span>'
+      + '<span class="status mixing">Pending</span>'
+      + '</div>'
+      + '<div class="customer">' + customer + '</div>'
+      + '<div class="order-items">' + items.join(' | ') + '</div>'
+      + '<div class="order-bottom">'
+      + '<span>Due: ' + dueFmt + '</span>'
+      + '<span>0% <div class="progress-bar"><div class="progress-fill" style="width:0%; background:var(--accent);"></div></div></span>'
+      + '</div>'
+      + '</div>';
+
+    // Add to the left column
+    const leftCol = document.getElementById('order-col-left');
+    leftCol.insertAdjacentHTML('afterbegin', cardHtml);
+
+    closeNewOrderModal();
+    showToast('Order ' + orderId + ' created successfully');
   });
 </script>
 </body>
