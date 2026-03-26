@@ -449,6 +449,69 @@
   .key-btn:hover { background: #3a3a3a; }
   .key-btn.zero { grid-column: 2; }
 
+  /* Logout */
+  .logout-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(231,76,60,0.15);
+    border: 1px solid rgba(231,76,60,0.3);
+    color: #e74c3c;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  .logout-btn:hover { background: rgba(231,76,60,0.25); }
+  .logout-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    padding: 20px;
+  }
+  .logout-modal {
+    background: #222;
+    border-radius: 12px;
+    border: 1px solid #444;
+    padding: 30px 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .logout-icon {
+    font-size: 40px;
+    color: #e74c3c;
+    margin-bottom: 12px;
+  }
+  .logout-modal h3 {
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .logout-modal p {
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .logout-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .cancel-btn, .confirm-logout-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .cancel-btn { background: #444; color: #fff; }
+  .cancel-btn:hover { background: #555; }
+  .confirm-logout-btn { background: #e74c3c; color: #fff; }
+  .confirm-logout-btn:hover { background: #c0392b; }
+
   /* Success toast */
   .toast {
     position: fixed;
@@ -574,6 +637,27 @@
           </div>
         </li>
       </ul>
+      <button class="logout-btn" onclick="showScreen('logout-screen')">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- ===== LOGOUT SCREEN ===== -->
+  <div class="screen" id="logout-screen">
+    <div class="app-header">
+      <button class="back-btn" onclick="showScreen('home-screen')">&larr;</button>
+      <span class="page-title">Sign Out</span>
+      <span class="brand"><img src="logo.png" alt="Sweet Maple"></span>
+    </div>
+    <div class="logout-content">
+      <div class="logout-modal">
+        <div class="logout-icon">&#9888;</div>
+        <h3>Sign Out?</h3>
+        <p>Are you sure you want to sign out of your account?</p>
+        <div class="logout-actions">
+          <button class="cancel-btn" onclick="showScreen('home-screen')">Cancel</button>
+          <button class="confirm-logout-btn" onclick="doLogout()">Sign Out</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -885,6 +969,11 @@
     closeModal();
     showToast('Transaction Saved!');
   }
+  function doLogout() {
+    showScreen('login-screen');
+    showToast('Signed out successfully');
+  }
+
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
