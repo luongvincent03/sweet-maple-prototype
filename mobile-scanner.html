@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=480, initial-scale=1.0">
+<title>Sweet Maple Candies - Mobile Scanner (Zebra TC57)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .device-frame {
+    width: 360px;
+    background: #0f0f0f;
+    border-radius: 24px;
+    border: 3px solid #333;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  /* Status Bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 16px;
+    background: #111;
+    color: #ccc;
+    font-size: 11px;
+  }
+  .status-bar .time { font-weight: 600; }
+  .status-icons { display: flex; gap: 4px; align-items: center; }
+  .status-icons span { font-size: 12px; }
+
+  /* Header */
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+  }
+  .app-header .page-title {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .app-header .brand {
+    font-family: 'Georgia', serif;
+    color: #c0392b;
+    font-size: 14px;
+    font-style: italic;
+  }
+  .back-btn {
+    color: #4a9eff;
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  /* Screen Container */
+  .screen {
+    display: none;
+    min-height: 480px;
+    background: #1a1a1a;
+    color: #fff;
+  }
+  .screen.active { display: block; }
+
+  /* Launch Screen */
+  #launch-screen {
+    background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 520px;
+    text-align: center;
+  }
+  #launch-screen.active { display: flex; }
+  .launch-time {
+    font-size: 72px;
+    font-weight: 200;
+    color: #fff;
+    letter-spacing: -2px;
+  }
+  .launch-brand {
+    font-family: 'Georgia', serif;
+    color: #c0392b;
+    font-size: 32px;
+    font-style: italic;
+    margin-top: 8px;
+  }
+  .launch-sub {
+    color: #888;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .tap-hint {
+    color: #555;
+    font-size: 12px;
+    margin-top: 40px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Login Screen */
+  #login-screen .login-form {
+    padding: 40px 24px;
+  }
+  .login-form .brand-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-form .brand-header h1 {
+    font-family: 'Georgia', serif;
+    color: #c0392b;
+    font-size: 24px;
+    font-style: italic;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    background: #111;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+  }
+  .form-group input:focus {
+    outline: none;
+    border-color: #4a9eff;
+  }
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .login-btn:hover { background: #219a52; }
+
+  /* Home Screen */
+  #home-screen .home-content {
+    padding: 20px;
+  }
+  .home-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+  .menu-list {
+    list-style: none;
+  }
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    margin-bottom: 10px;
+    background: #222;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid #333;
+    transition: all 0.2s;
+  }
+  .menu-item:hover {
+    background: #2a2a3a;
+    border-color: #4a9eff;
+  }
+  .menu-item .menu-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+  .menu-icon.batch { background: #2980b9; }
+  .menu-icon.inventory { background: #27ae60; }
+  .menu-icon.lifecycle { background: #e67e22; }
+  .menu-item .menu-text h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .menu-item .menu-text p {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  /* Scanner Screen */
+  .scanner-content {
+    padding: 16px;
+  }
+  .scan-instruction {
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .scanner-viewport {
+    width: 100%;
+    height: 200px;
+    background: #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 2px solid #333;
+  }
+  .scanner-viewport .barcode-img {
+    width: 200px;
+    height: 80px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #000;
+    position: relative;
+  }
+  .barcode-bars {
+    display: flex;
+    gap: 1px;
+    height: 50px;
+    align-items: flex-end;
+    margin-bottom: 4px;
+  }
+  .barcode-bars span {
+    display: block;
+    background: #000;
+    width: 2px;
+  }
+  .scanner-crosshair {
+    position: absolute;
+    width: 180px;
+    height: 100px;
+    border: 2px solid #27ae60;
+    border-radius: 4px;
+    box-shadow: 0 0 0 2000px rgba(0,0,0,0.4);
+  }
+  .scanner-crosshair::before,
+  .scanner-crosshair::after {
+    content: '';
+    position: absolute;
+    background: #27ae60;
+  }
+  .scanner-crosshair::before {
+    width: 100%;
+    height: 2px;
+    top: 50%;
+    left: 0;
+    animation: scanLine 2s infinite;
+  }
+  @keyframes scanLine {
+    0%, 100% { top: 20%; }
+    50% { top: 80%; }
+  }
+
+  .scan-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .scan-input-row input {
+    flex: 1;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+  }
+  .scan-btn {
+    padding: 10px 16px;
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .scan-btn:hover { background: #219a52; }
+
+  /* Result Card */
+  .result-card {
+    background: #222;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #333;
+    display: none;
+  }
+  .result-card.show { display: block; }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2a2a2a;
+    font-size: 13px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .label { color: #888; }
+  .result-row .value { color: #fff; font-weight: 500; text-align: right; }
+  .result-row .value.highlight { color: #f39c12; }
+  .result-row .value.success { color: #27ae60; }
+  .result-row .value.danger { color: #e74c3c; }
+
+  .action-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #333;
+  }
+  .action-label {
+    color: #4a9eff;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Inventory Transaction Dropdown */
+  .transaction-section {
+    margin-top: 16px;
+    display: none;
+  }
+  .transaction-section.show { display: block; }
+  .transaction-select {
+    width: 100%;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .qty-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .qty-row label {
+    color: #aaa;
+    font-size: 13px;
+    width: 80px;
+  }
+  .qty-row input {
+    flex: 1;
+    padding: 8px;
+    background: #111;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .submit-btn:hover { background: #2471a3; }
+
+  /* Function Keys */
+  .function-keys {
+    display: flex;
+    gap: 2px;
+    padding: 8px 12px;
+    background: #111;
+    border-top: 1px solid #333;
+  }
+  .fn-key {
+    flex: 1;
+    padding: 8px 4px;
+    background: #2a2a2a;
+    color: #aaa;
+    border: 1px solid #444;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+  }
+  .fn-key:hover { background: #3a3a3a; }
+  .fn-key.esc { background: #c0392b; color: #fff; }
+
+  /* Numeric Keypad */
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 8px 40px 16px;
+    background: #111;
+  }
+  .key-btn {
+    padding: 14px;
+    background: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+  }
+  .key-btn:hover { background: #3a3a3a; }
+  .key-btn.zero { grid-column: 2; }
+
+  /* Success toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: #27ae60;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 20px rgba(39,174,96,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Confirmation modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #222;
+    border-radius: 12px;
+    padding: 24px;
+    width: 300px;
+    border: 1px solid #444;
+    text-align: center;
+  }
+  .modal-box h3 { color: #fff; margin-bottom: 8px; }
+  .modal-box p { color: #aaa; font-size: 13px; margin-bottom: 20px; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .modal-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal-cancel { background: #444; color: #fff; }
+  .modal-confirm { background: #27ae60; color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="device-frame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time" id="clock">5:13 PM</span>
+    <div class="status-icons">
+      <span>&#128267;</span>
+      <span>&#9679;&#9679;&#9679;&#9679;</span>
+      <span>&#128268;</span>
+    </div>
+  </div>
+
+  <!-- ===== LAUNCH SCREEN ===== -->
+  <div class="screen active" id="launch-screen" onclick="showScreen('login-screen')">
+    <div class="launch-time" id="launch-clock">10:20</div>
+    <div class="launch-brand">Sweet Maple</div>
+    <div class="launch-sub">Candies Co. Ltd.</div>
+    <div class="tap-hint">Tap to unlock</div>
+  </div>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div class="screen" id="login-screen">
+    <div class="login-form">
+      <div class="brand-header">
+        <h1>Sweet Maple</h1>
+      </div>
+      <div class="form-group">
+        <label>Username:</label>
+        <input type="text" id="username" value="VLUONG">
+      </div>
+      <div class="form-group">
+        <label>Password:</label>
+        <input type="password" id="password" value="sweetmaple2026">
+      </div>
+      <button class="login-btn" onclick="doLogin()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ===== HOME SCREEN ===== -->
+  <div class="screen" id="home-screen">
+    <div class="app-header">
+      <span class="page-title">Home</span>
+      <span class="brand">Sweet Maple</span>
+    </div>
+    <div class="home-content">
+      <ul class="menu-list">
+        <li class="menu-item" onclick="showScreen('batch-scan-screen')">
+          <div class="menu-icon batch">&#128230;</div>
+          <div class="menu-text">
+            <h3>1. Batch Scanning</h3>
+            <p>Scan and track production batches</p>
+          </div>
+        </li>
+        <li class="menu-item" onclick="showScreen('inventory-screen')">
+          <div class="menu-icon inventory">&#128195;</div>
+          <div class="menu-text">
+            <h3>2. Inventory Transaction</h3>
+            <p>Record material usage & transfers</p>
+          </div>
+        </li>
+        <li class="menu-item" onclick="showScreen('lifecycle-screen')">
+          <div class="menu-icon lifecycle">&#9203;</div>
+          <div class="menu-text">
+            <h3>3. Product Lifecycle / FIFO</h3>
+            <p>Track expiry, shelf life & movement</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== BATCH SCANNING SCREEN ===== -->
+  <div class="screen" id="batch-scan-screen">
+    <div class="app-header">
+      <button class="back-btn" onclick="showScreen('home-screen')">&larr;</button>
+      <span class="page-title">Batch Scanning</span>
+      <span class="brand">Sweet Maple</span>
+    </div>
+    <div class="scanner-content">
+      <p class="scan-instruction">Scan a barcode or enter Batch ID manually</p>
+      <div class="scanner-viewport">
+        <div class="barcode-img">
+          <div style="text-align:center">
+            <div class="barcode-bars">
+              <span style="height:40px"></span><span style="height:45px"></span><span style="height:35px; width:1px"></span>
+              <span style="height:42px"></span><span style="height:38px; width:3px"></span><span style="height:45px"></span>
+              <span style="height:40px; width:1px"></span><span style="height:43px"></span><span style="height:36px; width:3px"></span>
+              <span style="height:44px"></span><span style="height:39px"></span><span style="height:41px; width:1px"></span>
+              <span style="height:45px; width:2px"></span><span style="height:37px"></span><span style="height:42px"></span>
+              <span style="height:40px; width:3px"></span><span style="height:44px"></span><span style="height:38px; width:1px"></span>
+              <span style="height:43px"></span><span style="height:35px"></span><span style="height:41px; width:2px"></span>
+              <span style="height:45px"></span><span style="height:39px; width:1px"></span><span style="height:42px; width:3px"></span>
+              <span style="height:37px"></span><span style="height:44px"></span><span style="height:40px"></span>
+            </div>
+            <div style="font-size:12px; margin-top:2px;">9568</div>
+          </div>
+        </div>
+        <div class="scanner-crosshair"></div>
+      </div>
+      <div class="scan-input-row">
+        <input type="text" id="batch-input" placeholder="Enter Batch ID..." value="105912412">
+        <button class="scan-btn" onclick="scanBatch()">SCAN</button>
+      </div>
+      <div class="result-card" id="batch-result">
+        <div class="result-row">
+          <span class="label">Batch ID:</span>
+          <span class="value" id="b-id">105912412</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Product Type:</span>
+          <span class="value" id="b-product">Jawbreakers</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Current Stage:</span>
+          <span class="value highlight" id="b-stage">S4 - Staging</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Creation Date:</span>
+          <span class="value" id="b-date">10/02/26 10:20AM</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Quantity:</span>
+          <span class="value" id="b-qty">2,400 units</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Location:</span>
+          <span class="value success" id="b-loc">Zone 3 - Bay 12</span>
+        </div>
+      </div>
+    </div>
+    <div class="function-keys">
+      <button class="fn-key esc" onclick="showScreen('home-screen')">ESC</button>
+      <button class="fn-key">F1</button>
+      <button class="fn-key">F2</button>
+      <button class="fn-key">F3</button>
+      <button class="fn-key">F4</button>
+      <button class="fn-key">F5</button>
+      <button class="fn-key">F6</button>
+      <button class="fn-key">F7</button>
+    </div>
+    <div class="keypad">
+      <button class="key-btn">1</button><button class="key-btn">2</button><button class="key-btn">3</button>
+      <button class="key-btn">4</button><button class="key-btn">5</button><button class="key-btn">6</button>
+      <button class="key-btn">7</button><button class="key-btn">8</button><button class="key-btn">9</button>
+      <button class="key-btn zero">0</button>
+    </div>
+  </div>
+
+  <!-- ===== INVENTORY SCREEN ===== -->
+  <div class="screen" id="inventory-screen">
+    <div class="app-header">
+      <button class="back-btn" onclick="showScreen('home-screen')">&larr;</button>
+      <span class="page-title">Inventory</span>
+      <span class="brand">Sweet Maple</span>
+    </div>
+    <div class="scanner-content">
+      <p class="scan-instruction">Scan a barcode to log an inventory transaction</p>
+      <div class="scanner-viewport">
+        <div class="barcode-img">
+          <div style="text-align:center">
+            <div class="barcode-bars">
+              <span style="height:40px"></span><span style="height:45px"></span><span style="height:35px; width:1px"></span>
+              <span style="height:42px"></span><span style="height:38px; width:3px"></span><span style="height:45px"></span>
+              <span style="height:40px; width:1px"></span><span style="height:43px"></span><span style="height:36px; width:3px"></span>
+              <span style="height:44px"></span><span style="height:39px"></span><span style="height:41px; width:1px"></span>
+              <span style="height:45px; width:2px"></span><span style="height:37px"></span><span style="height:42px"></span>
+              <span style="height:40px; width:3px"></span><span style="height:44px"></span><span style="height:38px; width:1px"></span>
+              <span style="height:43px"></span><span style="height:35px"></span><span style="height:41px; width:2px"></span>
+              <span style="height:45px"></span><span style="height:39px; width:1px"></span><span style="height:42px; width:3px"></span>
+              <span style="height:37px"></span><span style="height:44px"></span><span style="height:40px"></span>
+            </div>
+            <div style="font-size:12px; margin-top:2px;">9568</div>
+          </div>
+        </div>
+        <div class="scanner-crosshair"></div>
+      </div>
+      <div class="scan-input-row">
+        <input type="text" id="inv-input" placeholder="Enter Item ID..." value="9019591">
+        <button class="scan-btn" onclick="scanInventory()">SCAN</button>
+      </div>
+      <div class="result-card" id="inv-result">
+        <div class="result-row">
+          <span class="label">Item ID:</span>
+          <span class="value">9019591</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Quantity:</span>
+          <span class="value">1,024</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Transaction Type:</span>
+          <span class="value highlight">Materials Used</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Location:</span>
+          <span class="value success">Zone 2 - Bay 16</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Last Modified:</span>
+          <span class="value">10/06/26 11:32AM</span>
+        </div>
+      </div>
+      <div class="transaction-section" id="inv-transaction">
+        <select class="transaction-select">
+          <option>Materials Used</option>
+          <option>Materials Received</option>
+          <option>Transfer Out</option>
+          <option>Transfer In</option>
+          <option>Adjustment</option>
+          <option>Scrap / Waste</option>
+        </select>
+        <div class="qty-row">
+          <label>Quantity:</label>
+          <input type="number" value="50" min="1">
+        </div>
+        <button class="submit-btn" onclick="submitTransaction()">Submit Transaction</button>
+      </div>
+    </div>
+    <div class="function-keys">
+      <button class="fn-key esc" onclick="showScreen('home-screen')">ESC</button>
+      <button class="fn-key">F1</button>
+      <button class="fn-key">F2</button>
+      <button class="fn-key">F3</button>
+      <button class="fn-key">F4</button>
+      <button class="fn-key">F5</button>
+      <button class="fn-key">F6</button>
+      <button class="fn-key">F7</button>
+    </div>
+    <div class="keypad">
+      <button class="key-btn">1</button><button class="key-btn">2</button><button class="key-btn">3</button>
+      <button class="key-btn">4</button><button class="key-btn">5</button><button class="key-btn">6</button>
+      <button class="key-btn">7</button><button class="key-btn">8</button><button class="key-btn">9</button>
+      <button class="key-btn zero">0</button>
+    </div>
+  </div>
+
+  <!-- ===== LIFECYCLE / FIFO SCREEN ===== -->
+  <div class="screen" id="lifecycle-screen">
+    <div class="app-header">
+      <button class="back-btn" onclick="showScreen('home-screen')">&larr;</button>
+      <span class="page-title">Lifecycle / FIFO</span>
+      <span class="brand">Sweet Maple</span>
+    </div>
+    <div class="scanner-content">
+      <p class="scan-instruction">Scan a barcode to check product lifecycle status</p>
+      <div class="scanner-viewport">
+        <div class="barcode-img">
+          <div style="text-align:center">
+            <div class="barcode-bars">
+              <span style="height:40px"></span><span style="height:45px"></span><span style="height:35px; width:1px"></span>
+              <span style="height:42px"></span><span style="height:38px; width:3px"></span><span style="height:45px"></span>
+              <span style="height:40px; width:1px"></span><span style="height:43px"></span><span style="height:36px; width:3px"></span>
+              <span style="height:44px"></span><span style="height:39px"></span><span style="height:41px; width:1px"></span>
+              <span style="height:45px; width:2px"></span><span style="height:37px"></span><span style="height:42px"></span>
+              <span style="height:40px; width:3px"></span><span style="height:44px"></span><span style="height:38px; width:1px"></span>
+              <span style="height:43px"></span><span style="height:35px"></span><span style="height:41px; width:2px"></span>
+              <span style="height:45px"></span><span style="height:39px; width:1px"></span><span style="height:42px; width:3px"></span>
+              <span style="height:37px"></span><span style="height:44px"></span><span style="height:40px"></span>
+            </div>
+            <div style="font-size:12px; margin-top:2px;">9568</div>
+          </div>
+        </div>
+        <div class="scanner-crosshair"></div>
+      </div>
+      <div class="scan-input-row">
+        <input type="text" id="life-input" placeholder="Enter Item ID..." value="9019591">
+        <button class="scan-btn" onclick="scanLifecycle()">SCAN</button>
+      </div>
+      <div class="result-card" id="life-result">
+        <div class="result-row">
+          <span class="label">Item ID:</span>
+          <span class="value">9019591</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Expiry Date:</span>
+          <span class="value danger">10/16/26</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Best Before:</span>
+          <span class="value highlight">10/13/26</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Last Modified:</span>
+          <span class="value">10/09/26 02:55PM</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Location:</span>
+          <span class="value success">Zone 6 - Bay 9</span>
+        </div>
+        <div class="action-section">
+          <span class="action-label">Move to: Staging 4 Platform</span>
+        </div>
+      </div>
+    </div>
+    <div class="function-keys">
+      <button class="fn-key esc" onclick="showScreen('home-screen')">ESC</button>
+      <button class="fn-key">F1</button>
+      <button class="fn-key">F2</button>
+      <button class="fn-key">F3</button>
+      <button class="fn-key">F4</button>
+      <button class="fn-key">F5</button>
+      <button class="fn-key">F6</button>
+      <button class="fn-key">F7</button>
+    </div>
+    <div class="keypad">
+      <button class="key-btn">1</button><button class="key-btn">2</button><button class="key-btn">3</button>
+      <button class="key-btn">4</button><button class="key-btn">5</button><button class="key-btn">6</button>
+      <button class="key-btn">7</button><button class="key-btn">8</button><button class="key-btn">9</button>
+      <button class="key-btn zero">0</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">Transaction Saved!</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <h3>Confirm Transaction</h3>
+    <p>Submit "Materials Used" transaction for 50 units of Item #9019591?</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmTransaction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    let h = now.getHours(), m = now.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('clock').textContent = h + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+    document.getElementById('launch-clock').textContent = h + ':' + String(m).padStart(2,'0');
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  // Navigation
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function doLogin() {
+    showScreen('home-screen');
+  }
+
+  // Batch scan
+  function scanBatch() {
+    const card = document.getElementById('batch-result');
+    card.classList.add('show');
+  }
+
+  // Inventory scan
+  function scanInventory() {
+    document.getElementById('inv-result').classList.add('show');
+    document.getElementById('inv-transaction').classList.add('show');
+  }
+
+  // Lifecycle scan
+  function scanLifecycle() {
+    document.getElementById('life-result').classList.add('show');
+  }
+
+  // Transaction
+  function submitTransaction() {
+    document.getElementById('modal').classList.add('show');
+  }
+  function closeModal() {
+    document.getElementById('modal').classList.remove('show');
+  }
+  function confirmTransaction() {
+    closeModal();
+    showToast('Transaction Saved!');
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
